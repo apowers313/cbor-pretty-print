@@ -1,4 +1,6 @@
 module.exports = cborPrettyPrint;
+cborPrettyPrint.walkCbor = walkCbor;
+cborPrettyPrint.printCbor = printCbor;
 
 const CBOR_MAJOR = {
 	UNSIGNED_INT: 0x00,
@@ -26,25 +28,87 @@ const CBOR_LENGTH = {
 function cborPrettyPrint (cbor, output) {
 	if (output === undefined) output = process.stdout;
 	console.log ("cborPrettyPrint");
-	var cborTree = walkCbor (cbor);
+	var cborTree = walkCbor (cbor).value;
 	printCbor (cborTree);
 }
+
 // options:
 // 	 context
 //   callback
 function walkCbor (cbor, options) {
-	var retLen;
+	// console.log (cbor);
+	var ret, len, i, offset, key, value;
 	switch (cbor[0] & CBOR_MASK.MAJOR) {
+
 		case CBOR_MAJOR.MAP:
-			console.log ("map");
-			retLen = getCborLength(cbor);
-			console.log ("nelem:", retLen);
-			break;
+			ret = getCborLength(cbor);
+
+			// parse the members of the map
+			value = { type: "map", value: [], length: ret.length};
+			cbor = walkChildren(cbor, ret.bytes, ret.length * 2, options, function(v) {
+				if (key === undefined) {
+					key = v;
+				} else {
+					value.value.push({
+						key: key,
+						value: v
+					});
+					key = undefined;
+				}
+			});
+
+			// console.log (require("util").inspect(value,{depth:null}));
+			return {
+				value: value,
+				cbor: cbor
+			};
+
 		case CBOR_MAJOR.UNSIGNED_INT:
-		case CBOR_MAJOR.NEGATIVE_INT: 
+			return {
+				value: {
+					type: "int",
+					value: cbor[0]
+				},
+				cbor: cbor.slice(1)
+			};
+
 		case CBOR_MAJOR.BYTE_STRING:
+			ret = getCborLength(cbor);
+			return {
+				cbor: cbor.slice(ret.bytes + ret.length),
+				value: {
+					type: "byte",
+					length: ret.length,
+					value: cbor.slice(ret.bytes, ret.bytes + ret.length)
+				}
+			};
+
 		case CBOR_MAJOR.TEXT_STRING:
+			ret = getCborLength(cbor);
+			return {
+				cbor: cbor.slice(ret.bytes + ret.length),
+				value: {
+					type: "text",
+					length: ret.length,
+					value: cbor.slice(ret.bytes, ret.bytes + ret.length)
+				}
+			};
+
 		case CBOR_MAJOR.ARRAY:
+			ret = getCborLength(cbor);
+
+			// parse members of the list
+			value = { type: "list", value: [], length: ret.length};
+			cbor = walkChildren(cbor, ret.bytes, ret.length, options, function(v) {
+				value.value.push(v);
+			});
+
+			return {
+				cbor: cbor,
+				value: value
+			};
+
+		case CBOR_MAJOR.NEGATIVE_INT:
 		case CBOR_MAJOR.SEMANTIC_TAG:
 		case CBOR_MAJOR.VALUE:
 			/* falls through */
@@ -55,8 +119,7 @@ function walkCbor (cbor, options) {
 
 function getCborLength (cbor) {
 	var len = cbor[0] & CBOR_MASK.LENGTH;
-	console.log ("initial length:", len);
-	if (len < CBOR_LENGTH) return { length: len, bytes: 1 };
+	if (len < CBOR_LENGTH.ONE) return { length: len, bytes: 1 };
 	switch (len) {
 		case CBOR_LENGTH.ONE:
 			return { length: cbor[1], bytes: 2 };
@@ -69,6 +132,20 @@ function getCborLength (cbor) {
 		default:
 			console.log ("bad length in getCborLength");
 	}
+}
+
+
+function walkChildren (cbor, offset, len, options, cb) {
+	var i, ret;
+
+	for (i = 0; i < len; i++) {
+		ret = walkCbor (cbor.slice(offset), options);
+		cb (ret.value);
+		cbor = ret.cbor;
+		offset = 0;
+	}
+
+	return cbor;
 }
 
 function printCbor (cborTree, output) {
