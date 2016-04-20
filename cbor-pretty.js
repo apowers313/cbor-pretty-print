@@ -1,3 +1,5 @@
+var _ = require("lodash");
+
 module.exports = cborPrettyPrint;
 cborPrettyPrint.walkCbor = walkCbor;
 
@@ -24,18 +26,20 @@ const CBOR_LENGTH = {
 	INDEFINITE: 0x1F
 };
 
-function cborPrettyPrint(cbor, output) {
-	options = {
+function cborPrettyPrint(cbor, options) {
+	var defaultOptions = {
 		indent: 2,
 		hexSpace: true,
 		hexWrap: 8,
 		hexSyntax: false,
-		comment: "//"
+		comment: "//",
+		output: process.stdout
 	};
+	if (options === undefined) options = {};
+	options = _.assignIn(defaultOptions, options);
 
-	if (output === undefined) output = process.stdout;
 	var cborTree = walkCbor(cbor, options).value;
-	printCbor(cborTree, output, options);
+	printCbor(cborTree, options.output, options); // TDDO: remove output paramater, and just use options
 }
 
 // options:
@@ -193,10 +197,10 @@ function printCbor(node, output, options) {
 			break;
 		case "list":
 			printArray(node.bytes, "\t" + options.comment + " list(" + node.length + ")\n", output, options);
-			printChildren (node.value, output, options);
+			printChildren(node.value, output, options);
 			break;
 		case "text":
-			printArray(node.value, "\t" + options.comment + " text(" + node.length + ") = \"" + arrToStr (node.value) + "\"\n", output, options);
+			printArray(node.value, "\t" + options.comment + " text(" + node.length + ") = \"" + arrToStr(node.value) + "\"\n", output, options);
 			break;
 		case "byte":
 			printArray(node.value, "\t" + options.comment + " byte(" + node.length + ")\n", output, options);
@@ -216,7 +220,8 @@ function i2h(int, options) {
 }
 
 function arrToStr(arr, options) {
-	var str = "", i;
+	var str = "",
+		i;
 	for (i = 0; i < arr.length; i++) {
 		str += String.fromCharCode(arr[i]);
 	}
@@ -237,13 +242,13 @@ function printArray(arr, comment, output, options) {
 		if (options.hexWrap &&
 			i &&
 			(i % options.hexWrap) === 0) {
-			output.write (comment);
+			output.write(comment);
 			printIndent(indent, output, options);
 			comment = "\t" + options.comment + " ...\n";
 		}
 		output.write(i2h(arr[i], options));
 	}
-	output.write (comment);
+	output.write(comment);
 }
 
 function printChildren(arr, output, options) {
