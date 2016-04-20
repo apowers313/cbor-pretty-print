@@ -7,6 +7,22 @@ Parses and prints CBOR (RFC 7049)
 ## Command Line
 `cborprint file.json` -- converts `file.json` to CBOR and then prints it out
 
+``` 
+  Usage: cborprint [options] <file>
+
+  Converts JSON to CBOR and prints it out
+
+  Options:
+
+    -h, --help              output usage information
+    -V, --version           output the version number
+    -i, --indent <spaces>   number of spaces for each indent level
+    -s, --space-hex         whether or not to put a space between hex bytes (e.g. - 'FF 00' or 'FF00'
+    -w, --wrap-hex <bytes>  wrap hex lines after <bytes>
+    -x, --syntax            print out hex syntax in a ready to cut and paste way (e.g. - '0xFF,'
+    -c, --comment <string>  string to use for comments (e.g. - '//' or '#'
+```
+
 ## API
 ``` js
 var cp = require ("cbor-pretty-print");
