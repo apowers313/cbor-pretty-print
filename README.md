@@ -1,8 +1,14 @@
 # cbor-pretty-print
 Parses and prints CBOR (RFC 7049)
 
+NOTE: the CBOR parser is currently incomplete and only handles the most likely use cases: maps, byte / text strings, lists and integers. It does not handle floats, indefinite length items, negative numbers, or other types that are less frequently used. Pull requests or GitHub issues are always welcome.
+
 ## Install
+For API usage:
 `npm install https://github.com/apowers313/cbor-pretty-print`
+
+For command line usage:
+`npm install -g https://github.com/apowers313/cbor-pretty-print`
 
 ## Command Line
 `cborprint file.json` -- converts `file.json` to CBOR and then prints it out
