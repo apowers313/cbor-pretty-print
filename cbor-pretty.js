@@ -1,6 +1,5 @@
 module.exports = cborPrettyPrint;
 cborPrettyPrint.walkCbor = walkCbor;
-cborPrettyPrint.printCbor = printCbor;
 
 const CBOR_MAJOR = {
 	UNSIGNED_INT: 0x00,
@@ -25,17 +24,24 @@ const CBOR_LENGTH = {
 	INDEFINITE: 0x1F
 };
 
-function cborPrettyPrint (cbor, output) {
+function cborPrettyPrint(cbor, output) {
+	options = {
+		indent: 2,
+		hexSpace: true,
+		hexWrap: 8,
+		hexSyntax: false,
+		comment: "//"
+	};
+
 	if (output === undefined) output = process.stdout;
-	console.log ("cborPrettyPrint");
-	var cborTree = walkCbor (cbor).value;
-	printCbor (cborTree);
+	var cborTree = walkCbor(cbor, options).value;
+	printCbor(cborTree, output, options);
 }
 
 // options:
 // 	 context
 //   callback
-function walkCbor (cbor, options) {
+function walkCbor(cbor, options) {
 	// console.log (cbor);
 	var ret, len, i, offset, key, value;
 	switch (cbor[0] & CBOR_MASK.MAJOR) {
@@ -44,7 +50,12 @@ function walkCbor (cbor, options) {
 			ret = getCborLength(cbor);
 
 			// parse the members of the map
-			value = { type: "map", value: [], length: ret.length};
+			value = {
+				type: "map",
+				value: [],
+				length: ret.length,
+				bytes: cbor.slice(0, ret.bytes)
+			};
 			cbor = walkChildren(cbor, ret.bytes, ret.length * 2, options, function(v) {
 				if (key === undefined) {
 					key = v;
@@ -98,7 +109,12 @@ function walkCbor (cbor, options) {
 			ret = getCborLength(cbor);
 
 			// parse members of the list
-			value = { type: "list", value: [], length: ret.length};
+			value = {
+				type: "list",
+				value: [],
+				length: ret.length,
+				bytes: cbor.slice(0, ret.bytes)
+			};
 			cbor = walkChildren(cbor, ret.bytes, ret.length, options, function(v) {
 				value.value.push(v);
 			});
@@ -113,34 +129,46 @@ function walkCbor (cbor, options) {
 		case CBOR_MAJOR.VALUE:
 			/* falls through */
 		default:
-			console.log ("not supported");
+			console.log("not supported");
 	}
 }
 
-function getCborLength (cbor) {
+function getCborLength(cbor) {
 	var len = cbor[0] & CBOR_MASK.LENGTH;
-	if (len < CBOR_LENGTH.ONE) return { length: len, bytes: 1 };
+	if (len < CBOR_LENGTH.ONE) return {
+		length: len,
+		bytes: 1
+	};
 	switch (len) {
 		case CBOR_LENGTH.ONE:
-			return { length: cbor[1], bytes: 2 };
+			return {
+				length: cbor[1],
+				bytes: 2
+			};
 		case CBOR_LENGTH.TWO:
-			return { length: cbor[1] << 8 | cbor[2], bytes: 3 };
+			return {
+				length: cbor[1] << 8 | cbor[2],
+				bytes: 3
+			};
 		case CBOR_LENGTH.THREE:
-			return { length: cbor[1] << 16 | cbor[1] << 8 | cbor[3], bytes: 4};
+			return {
+				length: cbor[1] << 16 | cbor[1] << 8 | cbor[3],
+				bytes: 4
+			};
 		case CBOR_LENGTH.INDEFINITE:
 			/* falls through */
 		default:
-			console.log ("bad length in getCborLength");
+			console.log("bad length in getCborLength");
 	}
 }
 
 
-function walkChildren (cbor, offset, len, options, cb) {
+function walkChildren(cbor, offset, len, options, cb) {
 	var i, ret;
 
 	for (i = 0; i < len; i++) {
-		ret = walkCbor (cbor.slice(offset), options);
-		cb (ret.value);
+		ret = walkCbor(cbor.slice(offset), options);
+		cb(ret.value);
 		cbor = ret.cbor;
 		offset = 0;
 	}
@@ -148,6 +176,84 @@ function walkChildren (cbor, offset, len, options, cb) {
 	return cbor;
 }
 
-function printCbor (cborTree, output) {
+var indent = -1;
 
+function printCbor(node, output, options) {
+	var hex;
+	// console.log (node);
+	indent++;
+	printIndent(indent, output, options);
+	switch (node.type) {
+		case "map":
+			printArray(node.bytes, "\t" + options.comment + " map(" + node.length + ")\n", output, options);
+			printChildren(node.value, output, options);
+			break;
+		case "int":
+			output.write(i2h(node.value, options) + "\t" + options.comment + " integer " + node.value + "\n");
+			break;
+		case "list":
+			printArray(node.bytes, "\t" + options.comment + " list(" + node.length + ")\n", output, options);
+			printChildren (node.value, output, options);
+			break;
+		case "text":
+			printArray(node.value, "\t" + options.comment + " text(" + node.length + ") = \"" + arrToStr (node.value) + "\"\n", output, options);
+			break;
+		case "byte":
+			printArray(node.value, "\t" + options.comment + " byte(" + node.length + ")\n", output, options);
+			break;
+		default:
+			console.log("type not found: ", node.type);
+	}
+	indent--;
+}
+
+function i2h(int, options) {
+	var h = int.toString(16);
+	if (h.length === 1) h = "0" + h;
+	if (options.hexSyntax) h = "0x" + h + ",";
+	if (options.hexSpace) h = h + " ";
+	return h;
+}
+
+function arrToStr(arr, options) {
+	var str = "", i;
+	for (i = 0; i < arr.length; i++) {
+		str += String.fromCharCode(arr[i]);
+	}
+	return str;
+}
+
+function printIndent(indent, output, options) {
+	var i, str = "";
+	for (i = 0; i < indent * options.indent; i++) {
+		str += " ";
+	}
+	output.write(str);
+}
+
+function printArray(arr, comment, output, options) {
+	var i;
+	for (i = 0; i < arr.length; i++) {
+		if (options.hexWrap &&
+			i &&
+			(i % options.hexWrap) === 0) {
+			output.write (comment);
+			printIndent(indent, output, options);
+			comment = "\t" + options.comment + " ...\n";
+		}
+		output.write(i2h(arr[i], options));
+	}
+	output.write (comment);
+}
+
+function printChildren(arr, output, options) {
+	var i;
+	for (i = 0; i < arr.length; i++) {
+		if (arr[i].key !== undefined) {
+			printCbor(arr[i].key, output, options);
+			printCbor(arr[i].value, output, options);
+		} else {
+			printCbor(arr[i], output, options);
+		}
+	}
 }

@@ -20,10 +20,8 @@ describe("basic testing", function() {
 		// 	depth: null
 		// }));
 		assert.deepEqual(r, {
-			cbor: [],
 			value: {
 				type: 'map',
-				length: 2,
 				value: [{
 					key: {
 						type: 'int',
@@ -42,8 +40,11 @@ describe("basic testing", function() {
 						type: 'int',
 						value: 4
 					}
-				}]
-			}
+				}],
+				length: 2,
+				bytes: [162]
+			},
+			cbor: []
 		});
 	});
 
@@ -102,7 +103,8 @@ describe("basic testing", function() {
 							value: [69, 83, 50, 53, 54]
 						}
 					}],
-					length: 2
+					length: 2,
+					bytes: [162]
 				}, {
 					type: 'map',
 					value: [{
@@ -128,14 +130,22 @@ describe("basic testing", function() {
 							value: [82, 83, 50, 53, 54]
 						}
 					}],
-					length: 2
+					length: 2,
+					bytes: [162]
 				}],
-				length: 2
+				length: 2,
+				bytes: [130]
 			}
 		});
 	});
 
 	it("parses a cbor int");
+
+	it("does basic parising", function() {
+		cpp(helpers.arrayOfMapOfText /* , stream */);
+		// TODO -- how to test a stream?
+	});
+
 	it("can space characters");
 	it("has correct indentations");
 });
