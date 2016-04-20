@@ -141,11 +141,13 @@ describe("basic testing", function() {
 
 	it("parses a cbor int");
 
-	it("does basic parising", function() {
-		cpp(helpers.arrayOfMapOfText /* , stream */);
+	it.only("does basic parising", function() {
+		cpp(helpers.arrayOfMapOfText);
 		// TODO -- how to test a stream?
 	});
 
 	it("can space characters");
 	it("has correct indentations");
+	it("works with different options");
+	it("has a functional command line");
 });
