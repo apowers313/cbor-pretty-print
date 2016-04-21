@@ -27,10 +27,12 @@ const CBOR_LENGTH = {
 };
 
 function cborPrettyPrint(cbor, options) {
+	console.log (options);
+
 	var defaultOptions = {
 		indent: 2,
 		hexSpace: true,
-		hexWrap: 8,
+		wrapHex: 8,
 		hexSyntax: false,
 		comment: "//",
 		commentColumn: 60,
@@ -250,9 +252,9 @@ function printIndent(indent, output, options) {
 function printArray(arr, comment, output, options) {
 	var i;
 	for (i = 0; i < arr.length; i++) {
-		if (options.hexWrap &&
+		if (options.wrapHex &&
 			i &&
-			(i % options.hexWrap) === 0) {
+			(i % options.wrapHex) === 0) {
 			printComment(comment, output, options);
 			printIndent(indent, output, options);
 			comment = null;
