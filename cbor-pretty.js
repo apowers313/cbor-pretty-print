@@ -94,7 +94,8 @@ function walkCbor(cbor, options) {
 				value: {
 					type: "byte",
 					length: ret.length,
-					value: cbor.slice(ret.bytes, ret.bytes + ret.length)
+					value: cbor.slice(ret.bytes, ret.bytes + ret.length),
+					bytes: cbor.slice(0, ret.bytes)
 				}
 			};
 
@@ -105,7 +106,8 @@ function walkCbor(cbor, options) {
 				value: {
 					type: "text",
 					length: ret.length,
-					value: cbor.slice(ret.bytes, ret.bytes + ret.length)
+					value: cbor.slice(ret.bytes, ret.bytes + ret.length),
+					bytes: cbor.slice(0, ret.bytes)
 				}
 			};
 
@@ -200,10 +202,18 @@ function printCbor(node, output, options) {
 			printChildren(node.value, output, options);
 			break;
 		case "text":
-			printArray(node.value, "\t" + options.comment + " text(" + node.length + ") = \"" + arrToStr(node.value) + "\"\n", output, options);
+			printArray(node.bytes, "\t" + options.comment + " text(" + node.length + ")\n", output, options);
+			indent++;
+			printIndent(indent, output, options);
+			printArray(node.value, "\t" + options.comment + " \"" + arrToStr(node.value) + "\"\n", output, options);
+			indent--;
 			break;
 		case "byte":
 			printArray(node.value, "\t" + options.comment + " byte(" + node.length + ")\n", output, options);
+			indent++;
+			printIndent(indent, output, options);
+			printArray(node.value, "\t" + options.comment + " ...\n", output, options);
+			indent--;
 			break;
 		default:
 			console.log("type not found: ", node.type);

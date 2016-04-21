@@ -55,7 +55,8 @@ describe("basic testing", function() {
 			value: {
 				type: 'text',
 				length: 10,
-				value: [112, 97, 121, 112, 97, 108, 46, 99, 111, 109]
+				value: [112, 97, 121, 112, 97, 108, 46, 99, 111, 109],
+				bytes: [106]
 			}
 		});
 	});
@@ -67,7 +68,8 @@ describe("basic testing", function() {
 			value: {
 				type: 'byte',
 				length: 10,
-				value: [112, 97, 121, 112, 97, 108, 46, 99, 111, 109]
+				value: [112, 97, 121, 112, 97, 108, 46, 99, 111, 109],
+				bytes: [74]
 			}
 		});
 	});
@@ -84,23 +86,27 @@ describe("basic testing", function() {
 						key: {
 							type: 'text',
 							length: 4,
-							value: [116, 121, 112, 101]
+							value: [116, 121, 112, 101],
+							bytes: [100]
 						},
 						value: {
 							type: 'text',
 							length: 4,
-							value: [70, 73, 68, 79]
+							value: [70, 73, 68, 79],
+							bytes: [100]
 						}
 					}, {
 						key: {
 							type: 'text',
 							length: 9,
-							value: [97, 108, 103, 111, 114, 105, 116, 104, 109]
+							value: [97, 108, 103, 111, 114, 105, 116, 104, 109],
+							bytes: [105]
 						},
 						value: {
 							type: 'text',
 							length: 5,
-							value: [69, 83, 50, 53, 54]
+							value: [69, 83, 50, 53, 54],
+							bytes: [101]
 						}
 					}],
 					length: 2,
@@ -111,23 +117,27 @@ describe("basic testing", function() {
 						key: {
 							type: 'text',
 							length: 4,
-							value: [116, 121, 112, 101]
+							value: [116, 121, 112, 101],
+							bytes: [100]
 						},
 						value: {
 							type: 'text',
 							length: 4,
-							value: [70, 73, 68, 79]
+							value: [70, 73, 68, 79],
+							bytes: [100]
 						}
 					}, {
 						key: {
 							type: 'text',
 							length: 9,
-							value: [97, 108, 103, 111, 114, 105, 116, 104, 109]
+							value: [97, 108, 103, 111, 114, 105, 116, 104, 109],
+							bytes: [105]
 						},
 						value: {
 							type: 'text',
 							length: 5,
-							value: [82, 83, 50, 53, 54]
+							value: [82, 83, 50, 53, 54],
+							bytes: [101]
 						}
 					}],
 					length: 2,
@@ -141,7 +151,7 @@ describe("basic testing", function() {
 
 	it("parses a cbor int");
 
-	it.only("does basic parising", function() {
+	it("does basic parising", function() {
 		cpp(helpers.arrayOfMapOfText);
 		// TODO -- how to test a stream?
 	});
