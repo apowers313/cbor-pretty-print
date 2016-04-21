@@ -20,13 +20,14 @@ For command line usage:
 
   Options:
 
-    -h, --help              output usage information
-    -V, --version           output the version number
-    -i, --indent <spaces>   number of spaces for each indent level
-    -s, --space-hex         whether or not to put a space between hex bytes (e.g. - 'FF 00' or 'FF00'
-    -w, --wrap-hex <bytes>  wrap hex lines after <bytes>
-    -x, --syntax            print out hex syntax in a ready to cut and paste way (e.g. - '0xFF,'
-    -c, --comment <string>  string to use for comments (e.g. - '//' or '#'
+    -h, --help                  output usage information
+    -V, --version               output the version number
+    -i, --indent <spaces>       number of spaces for each indent level
+    -s, --no-hex-space          whether or not to put a space between hex bytes (e.g. - 'FF 00' or 'FF00'
+    -w, --wrap-hex <bytes>      wrap hex lines after <bytes>
+    -x, --syntax                print out hex syntax in a ready to cut and paste way (e.g. - '0xFF,'
+    -c, --comment <string>      string to use for comments (e.g. - '//' or '#'
+    -m, --comment-column <num>  what column the comments should be aligned to
 ```
 
 ## API
@@ -38,7 +39,7 @@ cp (cbor, options); // prints cbor with options
 var options = {
     indent: 2,              // number of spaces to indent each level
     hexSpace: true,         // put a space between hex numbers e.g. - "FF 00" instead of "FF00"
-    hexWrap: 8,             // number of hex characters to print before line wrapping
+    wrapHex: 8,             // number of hex characters to print before line wrapping
     hexSyntax: false,       // make hex syntactically correct to be cut-and-paste ready: "0xFF, "
     comment: "//",          // string to use for comments
     output: process.stdout  // output stream
@@ -69,4 +70,60 @@ If things go well, here's what the output should look like:
       6d                                // ...
     65                                  // text(5)
       52 53 32 35 36                    // "RS256"
+```
+
+<hr>
+
+With the following options:
+* `-x` on command line or `hexSyntax: true` in API
+* `-i 8` on command line or `indent: 8` in API
+* `-m 80` on command line or `commentColumn: 80` in API
+
+```
+0x82,                                                                           // list(2)
+        0xa2,                                                                   // map(2)
+                0x64,                                                           // text(4)
+                        0x74, 0x79, 0x70, 0x65,                                 // "type"
+                0x64,                                                           // text(4)
+                        0x46, 0x49, 0x44, 0x4f,                                 // "FIDO"
+                0x69,                                                           // text(9)
+                        0x61, 0x6c, 0x67, 0x6f, 0x72, 0x69, 0x74, 0x68,         // "algorithm"
+                        0x6d,                                                   // ...
+                0x65,                                                           // text(5)
+                        0x45, 0x53, 0x32, 0x35, 0x36,                           // "ES256"
+        0xa2,                                                                   // map(2)
+                0x64,                                                           // text(4)
+                        0x74, 0x79, 0x70, 0x65,                                 // "type"
+                0x64,                                                           // text(4)
+                        0x46, 0x49, 0x44, 0x4f,                                 // "FIDO"
+                0x69,                                                           // text(9)
+                        0x61, 0x6c, 0x67, 0x6f, 0x72, 0x69, 0x74, 0x68,         // "algorithm"
+                        0x6d,                                                   // ...
+                0x65,                                                           // text(5)
+                        0x52, 0x53, 0x32, 0x35, 0x36,                           // "RS256"
+```
+
+<hr>
+
+With the following options:
+* `-w 16` on command line or `wrapHex: 16` in API
+* `-s` on command line or `hexSpace: false` in API
+* `-c --` on command line or `comment: "--"` in API
+
+```
+83                                                          -- list(3)
+  61                                                        -- text(1)
+    78                                                      -- "x"
+  6a                                                        -- text(10)
+    30313030303030303132                                    -- "0100000012"
+  7890                                                      -- text(144)
+    33303436303232313030633539653334                        -- "3046022100c59e3484b03f0cc956ea5969d81ba98306bcde89fe331dce7ef69e31ca5435a3022100e48815ed05a7617a89799ab90fdc01a8df9766b15f45d56b350b95ec0c610d6d"
+    38346230336630636339353665613539                        -- ...
+    36396438316261393833303662636465                        -- ...
+    38396665333331646365376566363965                        -- ...
+    33316361353433356133303232313030                        -- ...
+    65343838313565643035613736313761                        -- ...
+    38393739396162393066646330316138                        -- ...
+    64663937363662313566343564353662                        -- ...
+    33353062393565633063363130643664                        -- ...
 ```
