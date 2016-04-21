@@ -293,23 +293,3 @@ function printComment(str, output, options) {
 	writeOutput(output, spacing + options.comment + " " + str + "\n");
 	writeCount = 0;
 }
-
-var Writable = require('stream').Writable;
-var util = require('util');
-
-util.inherits(ByteCounter, Writable);
-
-function ByteCounter(options) {
-	Writable.call(this, options);
-	this.bytes = 0;
-}
-
-var counter = new ByteCounter;
-counter.on('progress', function() {
-  console.log("progress", counter.bytes);
-});
-ByteCounter.prototype._write = function(chunk, encoding, cb) {
-	this.bytes += chunk.length;
-	this.emit('progress');
-	cb();
-};
