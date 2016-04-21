@@ -12,7 +12,7 @@ program
 	.option("-w, --wrap-hex <bytes>", "wrap hex lines after <bytes>")
 	.option("-x, --syntax", "print out hex syntax in a ready to cut and paste way (e.g. - '0xFF,'")
 	.option("-c, --comment <string>", "string to use for comments (e.g. - '//' or '#'")
-	.option("")
+	.option("-m, --comment-column <num>", "what column the comments should be aligned to")
 	.usage("[options] <file>")
 	.parse(process.argv);
 
@@ -25,6 +25,7 @@ if (program.spacehex) options.hexSpace = program.spacehex;
 if (program.hexWrap) options.hexWrap = program.hexWrap;
 if (program.syntax) options.hexSyntax = program.syntax;
 if (program.comment) options.comment = program.comment;
+if (program.commentColumn) options.commentColumn = program.commentColumn;
 
 var i;
 for (i = 0; i < program.args.length; i++) {

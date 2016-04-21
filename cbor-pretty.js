@@ -33,6 +33,7 @@ function cborPrettyPrint(cbor, options) {
 		hexWrap: 8,
 		hexSyntax: false,
 		comment: "//",
+		commentColumn: 60,
 		output: process.stdout
 	};
 	if (options === undefined) options = {};
@@ -191,28 +192,28 @@ function printCbor(node, output, options) {
 	printIndent(indent, output, options);
 	switch (node.type) {
 		case "map":
-			printArray(node.bytes, "\t" + options.comment + " map(" + node.length + ")\n", output, options);
+			printArray(node.bytes, "map(" + node.length + ")", output, options);
 			printChildren(node.value, output, options);
 			break;
 		case "int":
-			output.write(i2h(node.value, options) + "\t" + options.comment + " integer " + node.value + "\n");
+			writeOutput(output, i2h(node.value, options) + "integer " + node.value);
 			break;
 		case "list":
-			printArray(node.bytes, "\t" + options.comment + " list(" + node.length + ")\n", output, options);
+			printArray(node.bytes, "list(" + node.length + ")", output, options);
 			printChildren(node.value, output, options);
 			break;
 		case "text":
-			printArray(node.bytes, "\t" + options.comment + " text(" + node.length + ")\n", output, options);
+			printArray(node.bytes, "text(" + node.length + ")", output, options);
 			indent++;
 			printIndent(indent, output, options);
-			printArray(node.value, "\t" + options.comment + " \"" + arrToStr(node.value) + "\"\n", output, options);
+			printArray(node.value, "\"" + arrToStr(node.value) + "\"", output, options);
 			indent--;
 			break;
 		case "byte":
-			printArray(node.value, "\t" + options.comment + " byte(" + node.length + ")\n", output, options);
+			printArray(node.value, "byte(" + node.length + ")", output, options);
 			indent++;
 			printIndent(indent, output, options);
-			printArray(node.value, "\t" + options.comment + " ...\n", output, options);
+			printArray(node.value, null, output, options);
 			indent--;
 			break;
 		default:
@@ -243,7 +244,7 @@ function printIndent(indent, output, options) {
 	for (i = 0; i < indent * options.indent; i++) {
 		str += " ";
 	}
-	output.write(str);
+	writeOutput(output, str);
 }
 
 function printArray(arr, comment, output, options) {
@@ -252,13 +253,13 @@ function printArray(arr, comment, output, options) {
 		if (options.hexWrap &&
 			i &&
 			(i % options.hexWrap) === 0) {
-			output.write(comment);
+			printComment(comment, output, options);
 			printIndent(indent, output, options);
-			comment = "\t" + options.comment + " ...\n";
+			comment = null;
 		}
-		output.write(i2h(arr[i], options));
+		writeOutput(output, i2h(arr[i], options));
 	}
-	output.write(comment);
+	printComment(comment, output, options);
 }
 
 function printChildren(arr, output, options) {
@@ -272,3 +273,43 @@ function printChildren(arr, output, options) {
 		}
 	}
 }
+
+var writeCount = 0;
+function writeOutput (output, str) {
+	writeCount += str.length;
+	output.write (str);
+}
+
+function printComment(str, output, options) {
+	var i;
+	if (str === null) {
+		str = "...";
+	}
+
+	var spacing = " ";
+	for (i = 0; i < (options.commentColumn - writeCount - 1); i++) {
+		spacing += " ";
+	}
+	writeOutput(output, spacing + options.comment + " " + str + "\n");
+	writeCount = 0;
+}
+
+var Writable = require('stream').Writable;
+var util = require('util');
+
+util.inherits(ByteCounter, Writable);
+
+function ByteCounter(options) {
+	Writable.call(this, options);
+	this.bytes = 0;
+}
+
+var counter = new ByteCounter;
+counter.on('progress', function() {
+  console.log("progress", counter.bytes);
+});
+ByteCounter.prototype._write = function(chunk, encoding, cb) {
+	this.bytes += chunk.length;
+	this.emit('progress');
+	cb();
+};

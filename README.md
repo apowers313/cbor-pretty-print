@@ -48,25 +48,25 @@ var options = {
 ## Output
 If things go well, here's what the output should look like:
 ```
-82  // list(2)
-  a2    // map(2)
-    64  // text(4)
-      74 79 70 65   // "type"
-    64  // text(4)
-      46 49 44 4f   // "FIDO"
-    69  // text(9)
-      61 6c 67 6f 72 69 74 68   // "algorithm"
-      6d    // ...
-    65  // text(5)
-      45 53 32 35 36    // "ES256"
-  a2    // map(2)
-    64  // text(4)
-      74 79 70 65   // "type"
-    64  // text(4)
-      46 49 44 4f   // "FIDO"
-    69  // text(9)
-      61 6c 67 6f 72 69 74 68   // "algorithm"
-      6d    // ...
-    65  // text(5)
-      52 53 32 35 36    // "RS256"
+82                                      // list(2)
+  a2                                    // map(2)
+    64                                  // text(4)
+      74 79 70 65                       // "type"
+    64                                  // text(4)
+      46 49 44 4f                       // "FIDO"
+    69                                  // text(9)
+      61 6c 67 6f 72 69 74 68           // "algorithm"
+      6d                                // ...
+    65                                  // text(5)
+      45 53 32 35 36                    // "ES256"
+  a2                                    // map(2)
+    64                                  // text(4)
+      74 79 70 65                       // "type"
+    64                                  // text(4)
+      46 49 44 4f                       // "FIDO"
+    69                                  // text(9)
+      61 6c 67 6f 72 69 74 68           // "algorithm"
+      6d                                // ...
+    65                                  // text(5)
+      52 53 32 35 36                    // "RS256"
 ```
