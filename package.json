@@ -1,6 +1,6 @@
 {
   "name": "cbor-pretty-print",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "Parses and prints CBOR (RFC 7049)",
   "main": "cbor-pretty.js",
   "scripts": {
