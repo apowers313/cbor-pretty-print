@@ -3,6 +3,7 @@
 var program = require ("commander");
 var CBOR = require ("cbor-js");
 var cpp = require ("./cbor-pretty");
+var path = require ("path");
 
 program
 	.version("0.0.1")
@@ -32,7 +33,10 @@ console.log (options);
 var i;
 for (i = 0; i < program.args.length; i++) {
 	var filename = program.args[i];
-	if (filename[0] !== "/" && filename[0] !== ".") filename = "./" + filename;
+	var cwd = process.cwd();
+	if (!path.isAbsolute(filename)) {
+		filename = path.join (cwd, filename);
+	}
 	console.log ("Reading JSON file: " + filename + " ...");
 	var file = require (filename);
 	var cbor = new Uint8Array (CBOR.encode (file));
