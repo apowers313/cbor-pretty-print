@@ -21,14 +21,14 @@ program
 if (program.args.length === 0) program.help();
 
 var options = {};
-console.log ("space hex:", program.hexSpace);
+// console.log ("space hex:", program.hexSpace);
 if (program.indent !== undefined) options.indent = program.indent;
 if (program.hexSpace !== undefined) options.hexSpace = program.hexSpace;
 if (program.wrapHex !== undefined) options.wrapHex = program.wrapHex;
 if (program.syntax !== undefined) options.hexSyntax = program.syntax;
 if (program.comment!== undefined) options.comment = program.comment;
 if (program.commentColumn !== undefined) options.commentColumn = program.commentColumn;
-console.log (options);
+// console.log (options);
 
 var i;
 for (i = 0; i < program.args.length; i++) {
@@ -37,7 +37,7 @@ for (i = 0; i < program.args.length; i++) {
 	if (!path.isAbsolute(filename)) {
 		filename = path.join (cwd, filename);
 	}
-	console.log ("Reading JSON file: " + filename + " ...");
+	// console.log ("Reading JSON file: " + filename + " ...");
 	var file = require (filename);
 	var cbor = new Uint8Array (CBOR.encode (file));
 	cpp (cbor, options);
