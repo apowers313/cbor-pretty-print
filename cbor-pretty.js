@@ -27,7 +27,7 @@ const CBOR_LENGTH = {
 };
 
 function cborPrettyPrint(cbor, options) {
-	console.log (options);
+	// console.log (options);
 
 	var defaultOptions = {
 		indent: 2,
@@ -201,7 +201,7 @@ function printCbor(node, output, options) {
 			writeOutput(output, i2h(node.value, options) + "integer " + node.value);
 			break;
 		case "list":
-			printArray(node.bytes, "list(" + node.length + ")", output, options);
+			printArray(node.bytes, "array(" + node.length + ")", output, options);
 			printChildren(node.value, output, options);
 			break;
 		case "text":
